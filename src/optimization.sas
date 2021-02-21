@@ -1,10 +1,3 @@
-/*proc printto 
-	log="/home/sasdemo112/casuser/ramax/logs/log_%sysfunc(translate(%sysfunc(datetime(),datetime20.3),--,.:)).log" 
-	new;
-run;*/
-
-libname lib base "/home/sasdemo112/casuser/ramax/input";
-
 %macro optimization(
 	mpi_quals 				= LIB.QUALS,
 	mpi_months		    	= LIB.MONTHS,
@@ -155,16 +148,23 @@ libname lib base "/home/sasdemo112/casuser/ramax/input";
 		con cMinTop {w in WORKERS}:
 			sum {m in MONTHS: Top[m] = 1} zRestFlg[m,w] >= 1;
 
+		/*Минимальная продолжительность отпуска*/
+		con cMinRestSize {m in MONTHS, w in WORKERS}:
+			iRestHours[m,w] >= &mpi_min_rest_size. * zRestFlg[m,w];
+
+
 		/** Целевая функция **/
+
 
 		/* Минимизация отклонений от заявок сотрудников с учетом приоритетов */
 		min TotalDeviation =
 			sum {m in MONTHS, w in WORKERS} xDev[m,w] * OrderRate[m,w];
 
-		solve with milp / maxtime = 3600 nthreads = 32;
+		solve with milp / maxtime = 3600 nthreads = 32 decomp=(method=concomp);
 
 
-		/* Выходные таблицы */
+		/** Выходные таблицы **/
+
 
 		create data &mpo_work_hours. from [month worker qual] = {m in MONTHS, w in WORKERS, q in QUALS: QualFlg[w,q] = 1} 
 		iWorkHours;
