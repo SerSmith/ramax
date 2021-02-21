@@ -1,7 +1,3 @@
-/*proc printto 
-  log="/home/sasdemo112/casuser/ramax/logs/log_%sysfunc(translate(%sysfunc(datetime(),datetime20.3),--,.:)).log" 
-  new;
-run;*/
 
 libname lib base "/home/sasdemo112/casuser/ramax/input";
 
@@ -22,12 +18,17 @@ libname lib base "/home/sasdemo112/casuser/ramax/input";
   mpi_min_rest_size    = 36,
 
   mpo_work_hours       = LIB.WORK_HOURS,
-  mpo_months_workers     = LIB.MONTHS_WORKERS
+  mpo_months_workers   = LIB.MONTHS_WORKERS,
+  mpo_personal_rest    = LIB.PERSONAL_RESTS,
+  mpo_total_rests      = LIB.TOTAL_RESTS,
+  mpo_summary          = LIB.SUMMARY
+
+
 );
 
   proc optmodel;
 
-    / Объявление множеств и чтение данных /
+    /** Объявление множеств и чтение данных **/
 
     set <num> WORKERS;
     num PersonalLevel {WORKERS}, MaxFly {WORKERS}, Starts {WORKERS}, MaxStarts {WORKERS};
@@ -193,7 +194,7 @@ libname lib base "/home/sasdemo112/casuser/ramax/input";
 
     create data &mpo_personal_rest. from [worker month] = {w in WORKERS, m in MONTHS: iRestHours[m,w] > 0.5}
       iRestHours[m,w]
-      OrderFlg = 1]
+      OrderFlg = 1
     ;
 
     create data &mpo_total_rests. from [worker] = {w in WORKERS}
@@ -202,7 +203,7 @@ libname lib base "/home/sasdemo112/casuser/ramax/input";
       RestLeft = (max(&mpi_rest_year. - (sum {m in MONTHS} iRestHours[m,w]),0))
     ;
 
-    create data &mpo_summary from [month] = {m in MONTHS}
+    create data &mpo_summary. from [month] = {m in MONTHS}
       RequiredSum = (sum {q in QUALIFIED} Required[m,q])
       WorkSum = (sum {w in WORKERS, q in QUALIFIED: QualFlg[w,q] = 1} iWorkHours[m,w,q])
       RestHours = (sum {w in WORKERS} iRestHours[m,w])
