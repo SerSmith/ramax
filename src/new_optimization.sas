@@ -20,7 +20,10 @@ libname lib base "/home/sasdemo112/casuser/ramax/input";
 	mpi_deviation_weight    = 1,
 
 	mpo_work_hours 			= LIB.WORK_HOURS,
-	mpo_months_workers 		= LIB.MONTHS_WORKERS
+	mpo_months_workers 		= LIB.MONTHS_WORKERS,
+	mpo_personal_rest    	= LIB.PERSONAL_RESTS,
+ 	mpo_total_rests     	= LIB.TOTAL_RESTS,
+ 	mpo_summary         	= LIB.SUMMARY
 );
 
 	proc optmodel;
@@ -156,15 +159,6 @@ libname lib base "/home/sasdemo112/casuser/ramax/input";
 		/* Необходимо выделять требуемое количество ресурсов по квалификациям */
 		con cRequired {m in MONTHS, q in QUALS}:
 			QualWork[m,q] = Required[m,q];
-
-		/* Если отпускных часов 0, то флаг отпуска = 0 */
-		con cRestFlg1 {m in MONTHS, w in WORKERS}:
-			zRestFlg[m,w] <= iRestHoursP1[m,w] + iRestHoursP2[m,w];
-
-		/* Если отпускных часов > 0, то флаг отпуска = 1 */
-		con cRestFlg2 {m in MONTHS, w in WORKERS}:
-			iRestHoursP1[m,w] + iRestHoursP2[m,w] <= zRestFlg[m,w] * MaxRest[m];
-
 
 		/* Минимум 1 отпуск в топ месяц */
 		con cMinTop {w in WORKERS}:
