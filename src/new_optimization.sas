@@ -17,7 +17,7 @@ libname lib base "/home/sasdemo112/casuser/ramax/input";
 	mpi_min_rest_size		= 36,
 	mpi_min_rest_part_size	= 3,
 	mpi_order_weight        = 0.005,
-	mpi_deviation_weight    = 1,
+	mpi_deviation_weight    = 0,
 
 	mpo_work_hours 			= LIB.WORK_HOURS,
 	mpo_months_workers 		= LIB.MONTHS_WORKERS,
@@ -190,7 +190,17 @@ libname lib base "/home/sasdemo112/casuser/ramax/input";
 
 		/* Минимальная продолжительность перенесенной части отпуска */ 
 		con cMinRestSizeP2 {m in MONTHS, w in WORKERS}:
-			iRestHoursP1[m,w] >= &mpi_min_rest_part_size. * zTransFlg[m,w];
+			iRestHoursP2[m,w] >= &mpi_min_rest_part_size. * zTransFlg[m,w];
+
+		/* В один месяц можно либо начать отпуск, либо продолжить */
+		con cOneType {m in MONTHS, w in WORKERS}:
+			zStartFlg[m,w] + zTransFlg[m,w] <= 1;
+
+		/* Продолжить работу можно только, если она была начата в прошлый месяц */
+		con cContinued {m in MONTHS, w in WORKERS}:
+			zTransFlg[m,w] <= (if m = 1 then zStartFlg[12,w] else zStartFlg[m-1,w]);
+
+
 
 		num BigM = 200;
 
@@ -209,7 +219,7 @@ libname lib base "/home/sasdemo112/casuser/ramax/input";
 			  &mpi_order_weight * sum {m in MONTHS, w in WORKERS: RestReq[m,w] >= &mpi_min_rest_size.} zApproved[m,w] * OrderRate[m,w]
       		- &mpi_deviation_weight * sum {w in WORKERS} DifRestsHours[w];
 
-		solve with milp / maxtime = 3600 nthreads = 32 decomp=(method=concomp);
+		solve with milp / maxtime = 1000 nthreads = 32 decomp=(method=concomp);
 
 
 		/** Выходные таблицы **/
@@ -221,21 +231,22 @@ libname lib base "/home/sasdemo112/casuser/ramax/input";
 		create data &mpo_months_workers. from [month worker] = {m in MONTHS, w in WORKERS} 
 		iRestHoursP1 iRestHoursP2;
 
-		create data &mpo_personal_rest. from [worker month] = {w in WORKERS, m in MONTHS: iRestHours[m,w] > 0.5}
-		  iRestHours = (iRestHoursP1[m,w] + iRestHoursP2[m,w])
+		create data &mpo_personal_rest. from [worker month] = {w in WORKERS, m in MONTHS: RestFull[m,w] > 0.5}
+		  iRestHours = RestFull[m,w]
 		  Approved = (if RestReq[m,w] >= &mpi_min_rest_size. then zApproved[m,w] else 0)
+		  Rate = OrderRate[m,w]
 		;
 
 		create data &mpo_total_rests. from [worker] = {w in WORKERS}
 		  RestCount = (sum {m in MONTHS} zStartFlg[m,w])
-		  RestHours = (sum {m in MONTHS} iRestHours[m,w])
-		  RestLeft = (max(&mpi_rest_year. - (sum {m in MONTHS} iRestHoursP1[m,w] + iRestHoursP2[m,w]),0))
+		  RestHours = (sum {m in MONTHS} RestFull[m,w])
+		  RestLeft = (max(&mpi_rest_year. - (sum {m in MONTHS} RestFull[m,w]),0))
 		;
 
 		create data &mpo_summary from [month] = {m in MONTHS}
 		  RequiredSum = (sum {q in QUALS} Required[m,q])
 		  WorkSum = (sum {w in WORKERS, q in QUALS: QualFlg[w,q] = 1} iWorkHours[m,w,q])
-		  RestHours = (sum {w in WORKERS} iRestHours[m,w])
+		  RestHours = (sum {w in WORKERS} RestFull[m,w])
 		  RestCount = (sum {w in WORKERS} zStartFlg[m,w])
 		;
 	quit;
