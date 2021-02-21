@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 
 ramax_env/*
+ramax_env37/*
+logs/*
