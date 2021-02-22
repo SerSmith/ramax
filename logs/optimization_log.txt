@@ -1,0 +1,34 @@
+Academic license - for non-commercial use only - expires 2021-04-22
+Using license file C:\Users\rusivr\gurobi.lic
+WARNING: Loading a SolverResults object with an 'aborted' status, but
+    containing a solution
+OBJ : Size=1, Index=None, Active=True
+    Key  : Active : Value
+    None :   True : 12688.0
+OBJ : Size=1, Index=None, Active=True
+    Key  : Active : Value
+    None :   True :   0.0
+OBJ : Size=1, Index=None, Active=True
+    Key  : Active : Value
+    None :   True :   0.0
+OBJ : Size=1, Index=None, Active=True
+    Key  : Active : Value
+    None :   True : 1096.0
+OBJ : Size=1, Index=None, Active=True
+    Key  : Active : Value
+    None :   True : 772.0
+OBJ : Size=1, Index=None, Active=True
+    Key  : Active : Value
+    None :   True : 15272.0
+OBJ : Size=1, Index=None, Active=True
+    Key  : Active : Value
+    None :   True : 7740.0
+OBJ : Size=1, Index=None, Active=True
+    Key  : Active : Value
+    None :   True : 7062.0
+OBJ : Size=1, Index=None, Active=True
+    Key  : Active : Value
+    None :   True : 737.0
+OBJ : Size=1, Index=None, Active=True
+    Key  : Active : Value
+    None :   True :   0.0
