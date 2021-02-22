@@ -18,6 +18,8 @@ def run_optimization(
 	mpi_order_weight        = -0.005,
 	mpi_deviation_weight    = 1):
 
+	LOG_PATH = r'C:\Users\rusivr\Documents\GitHub\ramax\logs'
+	
     input_path = r'C:\Users\rusivr\Documents\GitHub\ramax\input\input_vacation.xlsx'
     # Массив характеристик сотрудников
     WORKERS = pd.read_excel (input_path, sheet_name = 'PersonalLevel ', index_col = [0]).to_dict('index')
@@ -232,9 +234,9 @@ def run_optimization(
     model.OBJ = pyo.Objective(expr = 
 			  mpi_order_weight * sum ((model.zApproved[m,w] * OrderRate(m,w,MaxPersonalLevel)) for m in MONTHS_KEYS for w in WORKERS_KEYS if RestReqPrior[m,w]['RestReq'] >= 36)
       		+ mpi_deviation_weight * sum(DifRestsHours(w) for w in WORKERS_KEYS))
-    GUROBI_LOG = GLOBAL_PATH + r'GUROBI_LOG.txt'
-    SOLVE_LOG = GLOBAL_PATH + r'SOLVE_LOG.txt'
-    SOLNFILE = GLOBAL_PATH + r'SOLNFILE.txt'
+    GUROBI_LOG = LOG_PATH + r'GUROBI_LOG.txt'
+    SOLVE_LOG = LOG_PATH + r'SOLVE_LOG.txt'
+    SOLNFILE = LOG_PATH + r'SOLNFILE.txt'
 
     # Вызов Gurobi солвера
     opt = SolverFactory("gurobi", solver_io="python", options={'TimeLimit': 1800, 'LogFile' : GUROBI_LOG, "threads" : 4})

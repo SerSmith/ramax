@@ -1,0 +1,5 @@
+Academic license - for non-commercial use only - expires 2021-04-22
+Using license file C:\Users\rusivr\gurobi.lic
+OBJ : Size=1, Index=None, Active=True
+    Key  : Active : Value
+    None :   True :   0.0
